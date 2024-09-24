@@ -103,7 +103,7 @@ def detect_emotion():
         # frame1 = imutils.resize("output.jpg", width=300)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_detection.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30),
-                                                 flags=cv2.CASCADE_SCALE_IMAGE)
+            flags=cv2.CASCADE_SCALE_IMAGE)
         preds = ""
         canvas = np.zeros((250, 300, 3), dtype="uint8")
         frameClone = frame.copy()

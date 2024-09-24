@@ -50,12 +50,12 @@ def browse_file():
     global filename_path
     global user_input
     if  user_input == "":
-         user_input = simpledialog.askstring("State", "Enter state name to listen regional songs:")
+        user_input = simpledialog.askstring("State", "Enter state name to listen regional songs:")
     label=get_emotion()
     #"angry" ,"disgust","scared", "happy", "sad", "surprised","neutral"
     if label=="neutral":
             print("Natural")
-           # label1="natural"
+        # label1="natural"
     elif label=="angry"  or label=="disgust" :
             print("Angry")
             #lable1="angry"
