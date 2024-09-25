@@ -39,8 +39,6 @@ def main_screen():
     b2 =  Button(screen3,text="Graph Analysis",height=2,width=50,bg="Black",fg="red",font=("Arial Bold", 15), command=graph)
     b2.pack()
 
-   
- 
     Label(screen3, text="", bg="green").pack()
     b5 =  Button(screen3,text="Exit",height=2,width=50,bg="Black",fg="green",font=("Arial Bold", 15),command=screen3.destroy)
     b5.pack()

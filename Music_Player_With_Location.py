@@ -1,27 +1,23 @@
 import os
+from os import walk
 import threading
 import time
 import tkinter.messagebox
 from tkinter import *
+from tkinter import simpledialog
 from tkinter import filedialog
-import sklearn as ss
-print(ss.__version__)
 from tkinter import ttk
+from tkinter import messagebox  # Import messagebox from tkinter
 from ttkthemes import themed_tk as tk
-
 from mutagen.mp3 import MP3
 from pygame import mixer
 import real_time_video as rtv
-from tkinter import simpledialog
 
 root = tk.ThemedTk()
-root.get_themes()             # Returns a list of all themes that can be set
-root.set_theme("radiance")         # Sets an available theme
+root.get_themes()  
+root.set_theme("radiance")
 
-# Fonts - Arial (corresponds to Helvetica), Courier New (Courier), Comic Sans MS, Fixedsys,
-# MS Sans Serif, MS Serif, Symbol, System, Times New Roman (Times), and Verdana
-#
-# Styles - normal, bold, roman, italic, underline, and overstrike.
+mixer.init()
 
 statusbar = ttk.Label(root, text="Welcome to Melody", relief=SUNKEN, anchor=W, font='Times 10 italic')
 statusbar.pack(side=BOTTOM, fill=X)
@@ -30,69 +26,73 @@ statusbar.pack(side=BOTTOM, fill=X)
 menubar = Menu(root)
 root.config(menu=menubar)
 
-# Create the submenu
-
 subMenu = Menu(menubar, tearoff=0)
 
 playlist = []
 user_input = ""
-from os import walk
-# playlist - contains the full path + filename
-# playlistbox - contains just the filename
-# Fullpath + filename is required to play the music inside play_music load function
-from tkinter import messagebox
+
+# Define your base directory for music files (hardcoded paths)
+cwd = "C:/Users/sahil/OneDrive/Desktop/Final Year Projects/Internship Project/Emotion Music Player code files/playlist"  # Example directory
+
+# Define paths for each emotion folder
+emotion_folders = {
+    "neutral": "neutral/",
+    "angry": "angry/",
+    "disgust": "angry/",  # Combining "angry" and "disgust" into one folder
+    "happy": "happy/",
+    "surprised": "happy/",  # Combining "happy" and "surprised" into one folder
+    "sad": "sad/",
+    "scared": "sad/"  # If you have a separate folder for "scared", you can update it
+}
 
 def check_folder_existence(location, folder_name):
     folder_path = os.path.join(location, folder_name)
     return os.path.exists(folder_path) and os.path.isdir(folder_path)
-cwd = "C:/Music-Player_Lyrics_Classification/playlist/"
+
+
 def browse_file():
     global filename_path
     global user_input
-    if  user_input == "":
+    if user_input == "":
         user_input = simpledialog.askstring("State", "Enter state name to listen regional songs:")
-    label=get_emotion()
-    #"angry" ,"disgust","scared", "happy", "sad", "surprised","neutral"
-    if label=="neutral":
-            print("Natural")
-        # label1="natural"
-    elif label=="angry"  or label=="disgust" :
-            print("Angry")
-            #lable1="angry"
-    elif label=="happy" or label=="surprised" :
-            print("Happy")
-            #label1="happy"
-    elif label=="sad":
-            print("Sad")
-            #label1="sad"
-    elif label=="scared":
-            print("Scared")
-            #label1="sad"
-    path_emotion=cwd
-    path=cwd+label+"/"
-    if not check_folder_existence(path_emotion, label):
-        if label == "no":
-              messagebox.showinfo("Emotion", "Emotion not detected..")
-              return
-        else:
-            messagebox.showinfo("Emotion", "No songs added for: "+label)
-            return 
-    
-    if not check_folder_existence(path, user_input):
-         messagebox.showinfo("Emotion", "No songs added for given location: "+user_input)
-         return 
-    
-   
-    if label!="no":
-        _, _, files = next(walk(path+user_input))
-    
-    
-        add_to_playlist(label+'/'+user_input,files)
-        for i in files:
-        
-            mixer.music.queue(path+user_input+"/"+i)
-            print("added")
 
+    label = get_emotion()
+    #"angry", "disgust", "scared", "happy", "sad", "surprised", "neutral"
+
+    if label == "neutral":
+        print("Detected Emotion: Neutral")
+    elif label == "angry" or label == "disgust":
+        print("Detected Emotion: Angry")
+    elif label == "happy" or label == "surprised":
+        print("Detected Emotion: Happy")
+    elif label == "sad":
+        print("Detected Emotion: Sad")
+    elif label == "scared":
+        print("Detected Emotion: Scared")
+
+    path_emotion = os.path.join(cwd, label)
+
+    if not check_folder_existence(cwd, label):
+        messagebox.showinfo("Emotion", f"No songs folder found for detected emotion: {label}")
+        return
+
+    region_folder = os.path.join(path_emotion, user_input)
+
+    if not check_folder_existence(path_emotion, user_input):
+        messagebox.showinfo("Emotion", f"No songs folder found for the region: {user_input}")
+        return
+
+    _, _, files = next(walk(region_folder))
+
+    if not files:
+        messagebox.showinfo("Emotion", f"No songs found for the detected emotion or location: {label} - {user_input}")
+        return
+
+    add_to_playlist(label + '/' + user_input, files)
+
+    for i in files:
+        mixer.music.queue(os.path.join(region_folder, i))
+        print(f"Added song: {i} from region: {user_input}")
 
 def add_to_playlist(label,filename):
 
@@ -101,11 +101,9 @@ def add_to_playlist(label,filename):
     print("hello")
     for i in filename:
         
-    
         playlistbox.insert(index, i)
         playlist.insert(index, path+i)
         index += 1
-
 
 menubar.add_cascade(label="File", menu=subMenu)
 subMenu.add_command(label="Open", command=browse_file)
@@ -122,7 +120,11 @@ subMenu = Menu(menubar, tearoff=0)
 menubar.add_cascade(label="Lyrics Analysis", menu=subMenu)
 subMenu.add_command(label="Lyrics", command=lyrics_analysis)
 
-mixer.init()  # initializing the mixer
+try:
+    mixer.init()  # initializing the mixer
+except Exception as e:
+    tkinter.messagebox.showerror('Error', f"Error initializing mixer: {e}")
+
 
 root.title("Melody")
 root.iconbitmap(r'images/melody.ico')
@@ -205,11 +207,10 @@ def start_count(t):
 
 def play_music():
     global paused
-
     if paused:
         mixer.music.unpause()
         statusbar['text'] = "Music Resumed"
-        paused = FALSE
+        paused = False
     else:
         try:
             stop_music()
@@ -217,18 +218,29 @@ def play_music():
             selected_song = playlistbox.curselection()
             selected_song = int(selected_song[0])
             play_it = playlist[selected_song]
-            mixer.music.load(play_it)
+            mixer.music.load(play_it)  # Ensure this is the full path
             mixer.music.play()
-            statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
+            statusbar['text'] = "Playing music - " + os.path.basename(play_it)
             show_details(play_it)
-        except:
-            tkinter.messagebox.showerror('File not found', 'Melody could not find the file. Please check again.')
+        except IndexError:
+            tkinter.messagebox.showerror('No selection', 'No song selected from the playlist.')
+        except Exception as e:
+            tkinter.messagebox.showerror('Error', f"Error playing file: {e}")
 
+def add_to_playlist(label, filename):
+    path = os.path.join(cwd, label)  # Ensure this is the full path
+    index = 0
+    for song in filename:
+        full_path = os.path.join(path, song)  # Create full path for each song
+        playlistbox.insert(index, song)
+        playlist.insert(index, full_path)  # Add the full path to the playlist
+        index += 1
+    print(f"Added {len(filename)} songs to playlist.")
 
 def stop_music():
     mixer.music.stop()
     statusbar['text'] = "Music Stopped"
-
+    mixer.music.unload()  # Unload the previous song
 
 paused = FALSE
 
@@ -249,7 +261,6 @@ def set_vol(val):
     volume = float(val) / 100
     mixer.music.set_volume(volume)
     # set_volume of mixer takes value only from 0 to 1. Example - 0, 0.1,0.55,0.54.0.99,1
-
 
 muted = FALSE
 
@@ -301,7 +312,6 @@ scale = ttk.Scale(bottomframe, from_=0, to=100, orient=HORIZONTAL, command=set_v
 scale.set(70)  # implement the default value of scale when music player starts
 mixer.music.set_volume(0.7)
 scale.grid(row=0, column=2, pady=15, padx=30)
-
 
 def on_closing():
     stop_music()
