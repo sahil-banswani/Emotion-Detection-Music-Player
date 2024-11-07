@@ -8,7 +8,7 @@ from sklearn.metrics import f1_score
 import pickle
 train_df = pd.read_csv('FullDataSet/Train.csv')
 test_df = pd.read_csv('FullDataSet/Test.csv')
-#Removing StopWords
+# Text Processing Language
 import re
 import nltk
 from nltk.stem import WordNetLemmatizer
@@ -17,6 +17,7 @@ lemmatizer = WordNetLemmatizer()
 
 sentences = []
 # count=0
+# Clening Process 
 for sent in train_df['Text']:
 #     print(count)
     sent = re.sub('[^a-zA-Z]', ' ',sent)
@@ -52,13 +53,14 @@ tf = TfidfVectorizer(max_features=5000)
 df1 = tf.fit_transform(train_df['Text']).toarray()
 pickle.dump(tf,open("feature.pkl","wb"))
 
+# DataFrame format
 df2 = tf.transform(test_df['Text']).toarray()
 df1 = pd.DataFrame(df1)
 df1 = pd.concat([train_df['Target'],df1],axis=1)
 df2 = pd.DataFrame(df2)
 df2 = pd.concat([test_df['Target'],df2],axis=1)
 
-
+# Gradient Boosting Function
 from sklearn.ensemble import GradientBoostingClassifier
 
 model = GradientBoostingClassifier()
@@ -72,7 +74,7 @@ confusion_matrix(df2['Target'],y_predicted)
 accuracy_score(df2['Target'],y_predicted)
 
 
-
+# Navie Baiye 
 from sklearn.naive_bayes import MultinomialNB
 
 model = MultinomialNB()
@@ -86,7 +88,8 @@ confusion_matrix(df2['Target'],y_predicted)
 accuracy_score(df2['Target'],y_predicted)
 
 
-
+# Target Maping
+# Logistic Regression
 from sklearn.linear_model import LogisticRegression
 model = LogisticRegression()
 
@@ -99,7 +102,8 @@ confusion_matrix(df2['Target'],y_predicted)
 accuracy_score(df2['Target'],y_predicted)
 
 
-
+# Fetaure Extraction 
+# Support Vector Classifier
 from sklearn.svm import SVC
 model = SVC()
 
