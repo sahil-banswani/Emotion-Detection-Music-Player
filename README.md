@@ -37,4 +37,4 @@ The **Emotion Detection Music Player** is a cutting-edge application designed to
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/emotion-detection-music-player.git
+   git clone https://github.com/sahil-banswani/Emotion-Detection-Music-Player
